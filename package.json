@@ -1,6 +1,6 @@
 {
   "name": "observa",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A very simplistic approach to observe on Object.",
   "main": "lib/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
   "author": "durgesh.priyaranjan@flipkart.com",
   "license": "MIT",
   "dependencies": {
-    "object.observe": "0.2.7"
+    "object.observe": "0.2.6"
   },
   "devDependencies": {
     "autoprefixer-loader": "^3.2.0",
