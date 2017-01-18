@@ -22,11 +22,19 @@ let callOnChangeLegacy = function callOnChangeLegacy(ctx){
 let proxyHandler = function(ctx) {
     return {
         get: function(target, prop, receiver) {
-            try {
-                return (isObject(target[prop]) && "___value" in target[prop]) ? target[prop].___value : target[prop];
-            } catch (e) {
-                return;
+            return target[prop];
+        },
+
+        deleteProperty: function (target, property) {
+            let deletedItem;
+            let oldVal = getObject(ctx);
+
+            if(Module.isObject(target) || Array.isArray(target)) {
+                deletedItem = delete target[property];
             }
+
+            callOnchange(ctx, oldVal, target, property);
+            return deletedItem;
         },
 
         set: function(target, name, value) {
@@ -49,12 +57,11 @@ let proxyHandler = function(ctx) {
             }
 
             if (!isObject(value)) {
-                target[name] = new Proxy({
-                    ___value: value
-                }, proxyHandler);
+                target[name] = value;
             }
 
             callOnchange(ctx, oldVal, target, name, value);
+            return target;
         }
     }
 };
@@ -62,7 +69,12 @@ let proxyHandler = function(ctx) {
 let ObservuI = function ObservuI(state, that, originalState) {
     if (isObject(state) && !Array.isArray(state)) {
         Object.keys(state).forEach((key) => {
-            that[key] = new Proxy(ObservuI(state[key], {}, originalState), proxyHandler(originalState));
+
+            if(isObject(state[key])){
+                that[key] = new Proxy(ObservuI(state[key], {}, originalState), proxyHandler(originalState));
+            } else {
+                that[key] = state[key];
+            }
         })
     }
 
@@ -71,9 +83,7 @@ let ObservuI = function ObservuI(state, that, originalState) {
     }
 
     if (!isObject(state)) {
-        return new Proxy({
-            ___value: state
-        }, proxyHandler(originalState));
+        return state;
     }
 
     return that;

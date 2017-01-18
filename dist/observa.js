@@ -94,11 +94,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	var proxyHandler = function proxyHandler(ctx) {
 	    return {
 	        get: function get(target, prop, receiver) {
-	            try {
-	                return (0, _utils.isObject)(target[prop]) && "___value" in target[prop] ? target[prop].___value : target[prop];
-	            } catch (e) {
-	                return;
+	            return target[prop];
+	        },
+
+	        deleteProperty: function deleteProperty(target, property) {
+	            var deletedItem = void 0;
+	            var oldVal = (0, _utils.getObject)(ctx);
+
+	            if (Module.isObject(target) || Array.isArray(target)) {
+	                deletedItem = delete target[property];
 	            }
+
+	            callOnchange(ctx, oldVal, target, property);
+	            return deletedItem;
 	        },
 
 	        set: function set(target, name, value) {
@@ -121,12 +129,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            if (!(0, _utils.isObject)(value)) {
-	                target[name] = new Proxy({
-	                    ___value: value
-	                }, proxyHandler);
+	                target[name] = value;
 	            }
 
 	            callOnchange(ctx, oldVal, target, name, value);
+	            return target;
 	        }
 	    };
 	};
@@ -134,7 +141,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ObservuI = function ObservuI(state, that, originalState) {
 	    if ((0, _utils.isObject)(state) && !Array.isArray(state)) {
 	        (0, _keys2.default)(state).forEach(function (key) {
-	            that[key] = new Proxy(ObservuI(state[key], {}, originalState), proxyHandler(originalState));
+
+	            if ((0, _utils.isObject)(state[key])) {
+	                that[key] = new Proxy(ObservuI(state[key], {}, originalState), proxyHandler(originalState));
+	            } else {
+	                that[key] = state[key];
+	            }
 	        });
 	    }
 
@@ -143,9 +155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (!(0, _utils.isObject)(state)) {
-	        return new Proxy({
-	            ___value: state
-	        }, proxyHandler(originalState));
+	        return state;
 	    }
 
 	    return that;
