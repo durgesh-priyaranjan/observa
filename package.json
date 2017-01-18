@@ -24,7 +24,7 @@
   "author": "durgesh.priyaranjan@flipkart.com",
   "license": "MIT",
   "dependencies": {
-    "object.observe": "0.2.6"
+    "object.observe": "0.2.7"
   },
   "devDependencies": {
     "autoprefixer-loader": "^3.2.0",
