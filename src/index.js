@@ -29,7 +29,7 @@ let proxyHandler = function(ctx) {
             let deletedItem;
             let oldVal = getObject(ctx);
 
-            if(Module.isObject(target) || Array.isArray(target)) {
+            if(isObject(target) || Array.isArray(target)) {
                 deletedItem = delete target[property];
             }
 
@@ -40,20 +40,16 @@ let proxyHandler = function(ctx) {
         set: function(target, name, value) {
             let oldVal = getObject(ctx);
 
-            if (Array.isArray(value)) {
+            if (Array.isArray(value) && name === 'length') {
                 target[name] = value;
-                callOnchange(ctx, oldVal, target, name, value);
                 return target;
+            }
+            if (Array.isArray(value)) {
+                target[name] = new Proxy(value, proxyHandler);
             }
 
             if (isObject(value) && !Array.isArray(value)) {
-                Object.keys(value).forEach((key) => {
-                    target[name] = new Proxy(ObservuI(value, {}), proxyHandler);
-                })
-            }
-
-            if (Array.isArray(value)) {
-                target[name] = new Proxy(value, proxyHandler);
+                    target[name] = ObservuI(value, {}, ctx);
             }
 
             if (!isObject(value)) {
@@ -69,24 +65,22 @@ let proxyHandler = function(ctx) {
 let ObservuI = function ObservuI(state, that, originalState) {
     if (isObject(state) && !Array.isArray(state)) {
         Object.keys(state).forEach((key) => {
-
             if(isObject(state[key])){
-                that[key] = new Proxy(ObservuI(state[key], {}, originalState), proxyHandler(originalState));
+                that[key] = ObservuI(state[key], {}, originalState);
             } else {
                 that[key] = state[key];
             }
-        })
+        });
+        return new Proxy(that, proxyHandler(originalState || state));
     }
 
     if (Array.isArray(state)) {
-        return new Proxy(state, proxyHandler(originalState));
+        return new Proxy(state, proxyHandler(originalState|| state));
     }
 
     if (!isObject(state)) {
         return state;
     }
-
-    return that;
 };
 
 let ObservuILegacy = function(state, that, originalState, callOnChangeLegacy){

@@ -3,6 +3,9 @@ export function isObject(x) {
 }
 
 export function getObject(ctx, root = {}) {
+    if(!ctx || isObject(ctx)){
+        return ctx;
+    }
     let clonedCtx = JSON.parse(JSON.stringify(ctx));
     for (var i in clonedCtx) {
         if (typeof clonedCtx[i] !== "object") {
