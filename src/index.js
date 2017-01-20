@@ -40,7 +40,7 @@ let proxyHandler = function(ctx) {
         set: function(target, name, value) {
             let oldVal = getObject(ctx);
 
-            if (Array.isArray(value) && name === 'length') {
+            if (Array.isArray(target) && name === 'length') {
                 target[name] = value;
                 return target;
             }

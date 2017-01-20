@@ -112,7 +112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        set: function set(target, name, value) {
 	            var oldVal = (0, _utils.getObject)(ctx);
 
-	            if (Array.isArray(value) && name === 'length') {
+	            if (Array.isArray(target) && name === 'length') {
 	                target[name] = value;
 	                return target;
 	            }
